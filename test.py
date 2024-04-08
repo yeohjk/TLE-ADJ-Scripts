@@ -1,4 +1,10 @@
+#Import Packages
 from skyfield.api import load, EarthSatellite
+
+#Defining class TLE
+class TLE:
+    def __init_(self, tle_file_name):
+        return
 
 ts = load.timescale()
 line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'
