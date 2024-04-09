@@ -24,8 +24,6 @@ with TLE("TLE files/TLE DS-EO 20240407 Spacetrack.txt") as tle_original:
     print(f'{tle_original.sat_name} File Parsed\nStarting Algorithm for {tle_original.sat_name}')
     #Creating skyfield EarthSatellite object for TLE
     ts = load.timescale()
-    line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'
-    line2 = '2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473'
     satellite = EarthSatellite(tle_original.line1, tle_original.line2, tle_original.sat_name, ts)
     print(satellite)
     print(satellite.epoch.utc_jpl())
