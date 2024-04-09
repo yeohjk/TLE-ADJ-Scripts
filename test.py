@@ -1,5 +1,5 @@
 #Importing Packages
-from skyfield.api import load, EarthSatellite
+from skyfield.api import load, EarthSatellite, wgs84
 
 #Defining Class TLE
 class TLE:
@@ -26,4 +26,12 @@ with TLE("TLE files/TLE DS-EO 20240407 Spacetrack.txt") as tle_original:
     ts = load.timescale()
     satellite = EarthSatellite(tle_original.line1, tle_original.line2, tle_original.sat_name, ts)
     print(satellite)
-    print(satellite.epoch.utc_jpl())
+    #AOS LOS Event Contact Locator
+    gsc_stn = wgs84.latlon(+1.29214, +103.78182)
+    t0 = ts.utc(2024, 4, 8)
+    t1 = ts.utc(2024, 4, 9)
+    t, events = satellite.find_events(gsc_stn, t0, t1, altitude_degrees=5)
+    event_names = 'rise above 5°', 'culminate', 'set below 5°'
+    for ti, event in zip(t, events):
+        name = event_names[event]
+        print(ti.utc_strftime('%Y %b %d %H:%M:%S'), name)
