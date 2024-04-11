@@ -30,8 +30,8 @@ with TLE("TLE files/TLE DS-EO 20240407 Spacetrack.txt") as tle_original:
     gsc_stn = wgs84.latlon(+1.29214, +103.78182)
     t0 = ts.utc(2024, 4, 8)
     t1 = ts.utc(2024, 4, 9)
-    t, events = satellite.find_events(gsc_stn, t0, t1, altitude_degrees=5)
+    t, event_flags = satellite.find_events(gsc_stn, t0, t1, altitude_degrees=5)
     event_names = 'rise above 5°', 'culminate', 'set below 5°'
-    for ti, event in zip(t, events):
+    for ti, event in zip(t, event_flags):
         name = event_names[event]
         print(ti.utc_strftime('%Y %b %d %H:%M:%S'), name)
