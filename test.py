@@ -13,17 +13,26 @@ class TLE_Refinement_Manager:
         self.propagator_object = Propagator(self.tle_object, t, ts)
         return
 
+#Defining Class Input File
+class Input_File:
+    def __init__(self, file_name):
+        print(f"Loading {} into program")
+        self.tle_file_name = tle_file_name
+        print(f"Loaded {} into program")
+        self.file_load()
+        return
+
 #Defining Class TLE
-class TLE:
+class TLE():
     def __init__(self, tle_file_name):
         self.tle_file_name = tle_file_name
-        print("Creating TLE Object")
         self.file_load()
         return
     def file_load(self):
+        print("Creating TLE Object")
         #Exception Handling
         try: 
-            self.tle_file = open(self.tle_file_name, "r")   
+            self.tle_file = open(self.tle_file_name, "r")
         except:
             raise Exception("TLE file loading error. Check TLE file name and TLE file content format") 
         else:
@@ -82,4 +91,4 @@ class Refined_TLE:
     def __init__(self):
         return
     
-TLE_Refinement_Manager("TLE DS-EO 20240407 Spacetrack.txt")
+#TLE_Refinement_Manager("TLE DS-EO 20240407 Spacetrack.txt")
