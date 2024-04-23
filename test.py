@@ -3,65 +3,91 @@ from skyfield.api import load, EarthSatellite, wgs84
 
 #class TLE Refinement Manager
 class TLE_Refinement_Manager:
-    def __init__(self, tle_file_name):
-        self.tle_file_name = tle_file_name
-        #Create TLE Object
-        self.tle_object = TLE(f"TLE files/{self.tle_file_name}")
-        #Pass TLE object to Propagator Object
+    def __init__(self):
+        self.file_dict = {"TLE":self.TLE_File_Propagator, "ANG":self.ANG_File_Propagator}
+        self.file_type = input("Input File Type (TLE/ANG)\n")
+        self.file_name = input("Input File Name with Extension\n")
+        self.file_propagator = self.file_dict[self.file_type]
+        self.file_propagator()
+        return
+    def TLE_File_Propagator(self):
+        #Create TLE File object
+        self.tle_file = TLE_File(f"TLE files/{self.file_name}")
+        #Pass TLE File object to Propagator object
         ts = load.timescale()
         t = ts.utc(2024, 4, 8, 22, 45, 0)
-        self.propagator_object = Propagator(self.tle_object, t, ts)
+        self.propagator_object = Propagator(self.tle_file.TLE_object, t, ts)
+        return
+    def ANG_File_Propagator(self):
+        #Create ANG File object
+        self.ang_file = ANG_File(f"Angle files/{self.file_name}")
+        #Pass ANG File object to Propagator object
+        ts = load.timescale()
+        t = ts.utc(2024, 4, 20, 22, 45, 0)
+        self.propagator_object = Propagator(self.ang_file.TLE_object, t, ts)
         return
 
 #Defining Class Input File
 class Input_File:
     def __init__(self, file_name):
-        print(f"Loading {} into program")
-        self.tle_file_name = tle_file_name
-        print(f"Loaded {} into program")
+        self.file_name = file_name
+        self.exception = []
         self.file_load()
+        self.parsing_TLE_info()
+        return
+    def file_load(self):
+        print(f"\nLoading {self.file_name} into program")
+        #Exception Handling
+        try:
+            self.loaded_file = open(self.file_name, "r")
+            self.file_contents_list = self.loaded_file.read().splitlines()
+            for line in self.file_contents_list:
+                print(line)
+        except:
+            self.exception.append("Error with file loading into program")
+        else:
+            print(f"Loaded {self.file_name} into program")
+        finally:
+            self.loaded_file.close()
         return
 
 #Defining Class TLE
-class TLE():
-    def __init__(self, tle_file_name):
-        self.tle_file_name = tle_file_name
-        self.file_load()
-        return
-    def file_load(self):
-        print("Creating TLE Object")
-        #Exception Handling
-        try: 
-            self.tle_file = open(self.tle_file_name, "r")
-        except:
-            raise Exception("TLE file loading error. Check TLE file name and TLE file content format") 
-        else:
-            self.tle_file_contents_list = self.tle_file.read().splitlines()
-            self.sat_name = self.tle_file_contents_list[0]
-            self.line1 = self.tle_file_contents_list[1]
-            self.line2 = self.tle_file_contents_list[2]
-            print(f"{self.sat_name} TLE file successfully loaded into program\nTLE Object created successfully for {self.sat_name}")
-        finally:
-            self.tle_file.close()
+class TLE_File(Input_File):
+    def parsing_TLE_info(self):
+        print("\nParsing TLE File")
+        self.TLE_object = TLE(self.file_contents_list)
+        print(f"TLE file for {self.TLE_object.sat_name} successfully parsed in program")
         return
 
 #Defining Angle_File
-class Angle_File:
-    def __init__(self):
+class ANG_File(Input_File):
+    def parsing_TLE_info(self):
+        print("\nParsing Angle File")
+        self.TLE_object = TLE(self.file_contents_list)
+        print(f"Angle file for Sat Cat Number {self.TLE_object.sat_name} successfully parsed in program")
+        return
+
+#Defining Class TLE
+class TLE:
+    def __init__(self, file_contents_list):
+        self.sat_name = file_contents_list[0][0:5]
+        self.line1 = file_contents_list[1]
+        self.line2 = file_contents_list[2]
         return
 
 #Defining Class Propagator
 class Propagator:
-    def __init__(self, tle_object = 0, time_stamp = 0, ts = 0):     
+    def __init__(self, tle_object, time_stamp, ts):     
         #Creating skyfield Ground Station and EarthSatellite object for TLE
-        self.ts = ts
+        self.tle_object = tle_object
         self.time_stamp = time_stamp
+        self.ts = ts
         self.gnd_stn = wgs84.latlon(+1.29214, +103.78182, elevation_m=83)
-        self.satellite = EarthSatellite(tle_object.line1, tle_object.line2, tle_object.sat_name, self.ts)
+        self.satellite = EarthSatellite(self.tle_object.line1, self.tle_object.line2, self.tle_object.sat_name, self.ts)
         print(self.satellite)
         #SGP4 Propagation Algorithm with Exception Handling
         try:
-            print(f'Starting SGP4 Propagation for {tle_object.sat_name}')
+            print(f'\nStarting SGP4 Propagation for {self.tle_object.sat_name}')
             #Satellite Az Al Position at time t
             self.difference_vec_func = self.satellite - self.gnd_stn
             self.topocentric_pos_vec = self.difference_vec_func.at(self.time_stamp)
@@ -72,7 +98,7 @@ class Propagator:
         except:
             raise Exception("SGP4 Propagation Error.") 
         else:
-            print(f'Completed SGP4 Propagation for {tle_object.sat_name}')
+            print(f'Completed SGP4 Propagation for {self.tle_object.sat_name}')
         return 
     def AOS_LOS_Locator(self, t0, t1, min_elev):
         #AOS LOS Event Contact Locator
@@ -86,9 +112,9 @@ class Propagator:
             print(ti.utc_strftime('%Y %b %d %H:%M:%S'), name)
         return
     
-#Defining Refined_TLE
+#Defining class Refined_TLE
 class Refined_TLE:
     def __init__(self):
         return
-    
-#TLE_Refinement_Manager("TLE DS-EO 20240407 Spacetrack.txt")
+
+Manager_Inst = TLE_Refinement_Manager()
