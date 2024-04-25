@@ -2,6 +2,12 @@
 from skyfield.api import load, EarthSatellite, wgs84
 import os
 
+#Assigning ANG file dictionaries
+ANG_File_Dict = {"Start_Pos":27}
+ANG_File_Time_Dict = {"Start_Pos":2,"Stop_Pos":18}
+ANG_File_El_Dict = {"Start_Pos":21,"Stop_Pos":26}
+ANG_File_Az_Dict = {"Start_Pos":27,"Stop_Pos":34}
+
 #class TLE Refinement Manager
 class TLE_Refinement_Manager:
     def __init__(self):
@@ -63,7 +69,8 @@ class TLE_Refinement_Manager:
         return
     def Content_Object_Creation(self):
         print("\nCreating content object")
-        self.TLE_object = self.input_file_content_class(self.loaded_file_contents_list).TLE_object
+        self.input_file_content = self.input_file_content_class(self.loaded_file_contents_list)
+        self.TLE_object = self.input_file_content.TLE_object
         print(f"Created TLE object for {self.TLE_object.sat_name} in program")
         return
     def TLE_Propagation(self):
@@ -101,6 +108,18 @@ class TLE_ANG_Content():
         self.loaded_file_contents_list = file_contents_list
         self.TLE_object = TLE(self.loaded_file_contents_list)
         self.TLE_object.sat_name = self.TLE_object.sat_name[0:5]
+        self.ANG_parsing()
+    def ANG_parsing(self):
+        self.t_list = []
+        self.el_list = []
+        self.az_list = []
+        for line in self.loaded_file_contents_list[ANG_File_Dict["Start_Pos"]:]:
+            t = float(line[ANG_File_Time_Dict["Start_Pos"]:ANG_File_Time_Dict["Stop_Pos"]])
+            el = float(line[ANG_File_El_Dict["Start_Pos"]:ANG_File_El_Dict["Stop_Pos"]])
+            az = float(line[ANG_File_Az_Dict["Start_Pos"]:ANG_File_Az_Dict["Stop_Pos"]])
+            self.t_list.append(t)
+            self.el_list.append(el)
+            self.az_list.append(az) 
         return
 
 #Defining Class TLE_Content
