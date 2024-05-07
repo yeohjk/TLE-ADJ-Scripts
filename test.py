@@ -26,7 +26,7 @@ class TLE_Refinement_Manager:
     def Process(self):    
         #Choosing operation mode
         self.Operation_Mode()
-        #Choosing file and loading 
+        #Choosing file
         self.File_Selection()
         #Loading in file
         self.File_Loading()
