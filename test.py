@@ -2,6 +2,8 @@
 from skyfield.api import load, EarthSatellite, wgs84
 import os
 from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+
 
 #Assigning ANG file dictionaries
 ANG_File_Dict = {"Start_Pos":27}
